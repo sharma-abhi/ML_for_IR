@@ -1,0 +1,70 @@
+DELETE ap_dataset
+
+PUT /ap_dataset/
+{
+  "settings": {
+    "index": {
+      "store": {
+        "type": "default"
+      },
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "analysis": {
+      "analyzer": {
+        "my_english": { 
+          "type": "english",
+          "stopwords_path": "stoplist.txt" 
+        }
+      }
+    }
+  }
+}
+
+PUT /ap_dataset/document/_mapping
+{
+  "document": {
+    "properties": {
+      "docno": {
+        "type": "string",
+        "store": true,
+        "index": "not_analyzed"
+      },
+      "text": {
+        "type": "string",
+        "store": true,
+        "index": "analyzed",
+        "term_vector": "with_positions_offsets_payloads",
+        "analyzer": "my_english"
+      },
+      "doclength": {
+        "type": "long",
+        "store": true,
+        "index": "not_analyzed"
+      }
+    }
+  }
+}
+
+GET /ap_dataset/document/_search
+
+GET ap_dataset/document/_search
+{
+    "aggs":{
+        "unique_terms":{
+            "cardinality":{
+                "field":"text"
+            }
+        }
+    }
+}
+GET ap_dataset/document/_search
+{
+    "aggs":{
+        "unique_terms":{
+            "cardinality":{
+                "script": "doc['text'].values"
+            }
+        }
+    }
+}
