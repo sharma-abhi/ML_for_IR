@@ -8,6 +8,7 @@ import cPickle as cp
 import string
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 
 def clean_query(query_string):
@@ -106,6 +107,7 @@ else:
     print "Training queries: ", train_query_no
     print "Test queries: ", test_query_no
 
+    # creating Test data frame
     order_list = []
 
     # feature : (queryid-docid)
@@ -178,7 +180,7 @@ else:
     train_data = df.values
     train_data2 = df.drop(['label'], axis=1).values
 
-
+    # creating Test data frame
     order_list = []
     feature1,feature2, feature3, feature4, feature5, feature6, feature7, feature8, feature9, feature10 = \
         ({} for i in range(10))
@@ -242,7 +244,7 @@ else:
     forest = forest.fit(train_data[0::, 1::], train_data[0::, 0])
     output_forest = forest.predict(test_data)
 
-    # Random Forest on Test Data
+    # Random Forest Classifier on Test Data
     forest_dict = {}
     for item in zip(test_ids, output_forest):
         (query_no, docno), score = item
@@ -260,7 +262,7 @@ else:
                 rank += 1
     print "Random Forest on test data complete"
 
-    # Random Forest on Train Data
+    # Random Forest Classifier on Train Data
     train_output_forest = forest.predict(train_data2)
     forest_dict = {}
 
@@ -279,6 +281,7 @@ else:
                 f.write(str(query_no) + " Q0 " + str(docno) + " " + str(rank) + " " + str(val[docno]) + " Exp\n")
                 rank += 1
     print "Random Forest on train data complete"
+
     # Linear Regression on Test Data
     linear_reg = LinearRegression(normalize=True)
     linear_reg = linear_reg.fit(train_data[0::, 1::], train_data[0::, 0])
@@ -322,3 +325,68 @@ else:
                 rank += 1
 
     print "Linear Regression on train data complete"
+
+    forest = RandomForestClassifier(n_estimators=100)
+    forest = forest.fit(train_data[0::, 1::], train_data[0::, 0])
+    output_forest = forest.predict(test_data)
+
+    # Random Forest Classifier on Test Data
+    forest_dict = {}
+    for item in zip(test_ids, output_forest):
+        (query_no, docno), score = item
+        if forest_dict.get(query_no) is None:
+            forest_dict[query_no] = {docno: score}
+        else:
+            forest_dict[query_no][docno] = score
+
+    with open("random_forest_test_output.txt", "w") as f:
+        for query_no, val in forest_dict.items():
+            rank = 1
+            sorted_keys = sorted(val, key=val.get, reverse=True)
+            for docno in sorted_keys:
+                f.write(str(query_no) + " Q0 " + str(docno) + " " + str(rank) + " " + str(val[docno]) + " Exp\n")
+                rank += 1
+    print "Random Forest on test data complete"
+
+    # Random Forest Regressor on Train Data
+    reg_forest = RandomForestRegressor(n_estimators=100)
+    reg_forest = reg_forest.fit(train_data[0::, 1::], train_data[0::, 0])
+    output_reg_forest = reg_forest.predict(test_data)
+
+    # Random Forest Regressor on Test Data
+    forest_dict = {}
+    for item in zip(test_ids, output_reg_forest):
+        (query_no, docno), score = item
+        if forest_dict.get(query_no) is None:
+            forest_dict[query_no] = {docno: score}
+        else:
+            forest_dict[query_no][docno] = score
+
+    with open("random_forest_reg_test_output.txt", "w") as f:
+        for query_no, val in forest_dict.items():
+            rank = 1
+            sorted_keys = sorted(val, key=val.get, reverse=True)
+            for docno in sorted_keys:
+                f.write(str(query_no) + " Q0 " + str(docno) + " " + str(rank) + " " + str(val[docno]) + " Exp\n")
+                rank += 1
+    print "Random Forest Regresssor on test data complete"
+
+    # Random Forest Regressor on Train Data
+    train_output_reg_forest = reg_forest.predict(train_data2)
+    forest_dict = {}
+
+    for item in zip(test_ids, train_output_reg_forest):
+        (query_no, docno), score = item
+        if forest_dict.get(query_no) is None:
+            forest_dict[query_no] = {docno: score}
+        else:
+            forest_dict[query_no][docno] = score
+
+    with open("random_forest_reg_train_output.txt", "w") as f:
+        for query_no, val in forest_dict.items():
+            rank = 1
+            sorted_keys = sorted(val, key=val.get, reverse=True)
+            for docno in sorted_keys:
+                f.write(str(query_no) + " Q0 " + str(docno) + " " + str(rank) + " " + str(val[docno]) + " Exp\n")
+                rank += 1
+    print "Random Forest Regresssor on train data complete"
