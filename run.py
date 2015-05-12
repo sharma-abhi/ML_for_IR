@@ -107,7 +107,7 @@ else:
     print "Training queries: ", train_query_no
     print "Test queries: ", test_query_no
 
-    # creating Test data frame
+    # creating Training data frame
     order_list = []
 
     # feature : (queryid-docid)
@@ -121,10 +121,10 @@ else:
             order_list.append((query_no, k))
             feature1[(query_no, k)] = str((query_no, k))
             feature2[(query_no, k)] = doc_length[k]
-            #print " before calc"
+
             feature3[(query_no, k)], feature4[(query_no, k)], feature5[(query_no, k)] = \
                 cq.calc_frequencies(query_dict[query_no], k)
-            #print " after calc"
+
             if okapi_tf_val[str(query_no)].get(k) is None:
                 feature6[(query_no, k)] = 0
             else:
@@ -145,6 +145,7 @@ else:
                 feature10[(query_no, k)] = 0
             else:
                 feature10[(query_no, k)] = jm_val[str(query_no)][k]
+
 
     for item in order_list:
         f1.append(feature1[item])

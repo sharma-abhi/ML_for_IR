@@ -1,7 +1,8 @@
 AP_DATA/
 Results/
 .idea/
-idea/
+doc_length.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
